@@ -1,5 +1,6 @@
 import pygame
 
+
 class Button():
     def __init__(self, x, y, image, scale=1):
         width = image.get_width()
@@ -10,15 +11,13 @@ class Button():
         self.clicked = False
         self.hovered = False
 
-
-
     def draw(self, surface, activity='left_click'):
         action = False
 
-        #get mouse pos
+        # get mouse pos
         pos = pygame.mouse.get_pos()
 
-            #check mouseover and clicked condotions
+        # check mouseover and clicked condotions
         if activity == 'left_click':
             if self.rect.collidepoint(pos):
                 if pygame.mouse.get_pressed()[0] and not self.clicked:
@@ -27,7 +26,7 @@ class Button():
             if not pygame.mouse.get_pressed()[0]:
                 self.clicked = False
 
-            #draw button on screen
+            # draw button on screen
             surface.blit(self.image, (self.rect.x, self.rect.y))
 
         elif activity == 'hover':
@@ -36,7 +35,5 @@ class Button():
                 action = True
             else:
                 action = False
-
-
 
         return action
