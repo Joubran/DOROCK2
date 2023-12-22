@@ -36,10 +36,13 @@ class Menu:
         pygame.mixer.init()
         pygame.mixer.music.play(loops=-1, fade_ms=5000)
         pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.pause()
 
         # sounds
         sound_hover = pygame.mixer.Sound('Sounds/hover_button_sound.ogg')
         sound_hover.set_volume(0.15)
+        killed = pygame.mixer.Sound('Sounds/killed.ogg')
+        killed.set_volume(0.2)
 
         back_img = pygame.image.load('Images/Buttons/back.png').convert_alpha()
         back_img_bright = pygame.image.load('Images/Buttons/back_bright.png').convert_alpha()
@@ -167,6 +170,7 @@ class Menu:
             bird_killed = False
             last_blood_update = pygame.time.get_ticks()
 
+            turned_on = False
             while running:
                 screen.fill(black_color)
                 for event in pygame.event.get():
@@ -184,13 +188,16 @@ class Menu:
                 if game_started:
                     if circles == 0:
                         increasing, alpha, circles = draw_fade_text("\"The Procrastinators\" presents", pixel_50,
-                                                                    white_color, 640, 360, 100, increasing, alpha,
+                                                                    white_color, 640, 360, 3, increasing, alpha,
                                                                     circles)
                     elif circles == 1:
-                        increasing, alpha, circles = draw_fade_text("Dorock", pixel_50, (179, 0, 0), 640, 360, 100,
+                        increasing, alpha, circles = draw_fade_text("Dorock", pixel_50, (179, 0, 0), 640, 360, 3,
                                                                     increasing, alpha, circles)
                     else:
                         screen.blit(bg_img, (0, 0))
+                        if not turned_on:
+                            pygame.mixer.music.unpause()
+                            turned_on = True
                         current_time = pygame.time.get_ticks()
 
                         start_action, start_hovered = button_actions(start_button, start_button_bright, current_time,
@@ -235,6 +242,7 @@ class Menu:
                                 prev_y = bird_y
                                 bird_x = -1
                                 bird_killed = True
+                                killed.play()
                         else:
                             if current_time - last_bird > random.randint(4000, 30000):
                                 bird_x = 1280
@@ -382,8 +390,10 @@ class Menu:
                 if sounds_action:
                     if svol == 0:
                         sound_hover.set_volume(0.15)
+                        killed.set_volume(0.2)
                     else:
                         sound_hover.set_volume(0)
+                        killed.set_volume(0)
 
                 if svol == 0:
                     draw_text('OFF', pixel_50, settings_color, 856, 356)
@@ -448,7 +458,7 @@ class Menu:
                 pygame.display.update()
                 clock.tick(fps)
 
-        main_menu(self, False)
+        main_menu(False)
 
         pygame.quit()
         sys.exit()
