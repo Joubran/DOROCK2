@@ -20,8 +20,6 @@ class Menu:
         screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption('Dorock')
 
-        resolutions = ['720x576', '1280x720', 'FULL HD']
-
         # FPS
         clock = pygame.time.Clock()
         fps = 60
@@ -38,10 +36,13 @@ class Menu:
         pygame.mixer.init()
         pygame.mixer.music.play(loops=-1, fade_ms=5000)
         pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.pause()
 
         # sounds
         sound_hover = pygame.mixer.Sound('Sounds/hover_button_sound.ogg')
         sound_hover.set_volume(0.15)
+        killed = pygame.mixer.Sound('Sounds/killed.ogg')
+        killed.set_volume(0.2)
 
         back_img = pygame.image.load('Images/Buttons/back.png').convert_alpha()
         back_img_bright = pygame.image.load('Images/Buttons/back_bright.png').convert_alpha()
@@ -113,6 +114,7 @@ class Menu:
             settings_img_bright = pygame.image.load('Images/Buttons/sign_settings_bright.png').convert_alpha()
             exit_img = pygame.image.load('Images/Buttons/sign_exit.png').convert_alpha()
             exit_img_bright = pygame.image.load('Images/Buttons/sign_exit_bright.png').convert_alpha()
+            bird_click_img = pygame.image.load('Images/bird_rect.png').convert_alpha()
 
             # making them buttons
             start_button = button.Button(465, 50, start_img, 0.15)
@@ -122,42 +124,53 @@ class Menu:
             exit_button = button.Button(465, 410, exit_img, 0.15)
             exit_button_bright = button.Button(465, 410, exit_img_bright, 0.15)
 
-            # birds and axolotl
+            # sprites_images
             bird_sheet_image = pygame.image.load('Images/bird_sprites.png').convert_alpha()
             bird_sprites = ss.SpriteSheet(bird_sheet_image)
             axolotl_sheet_image = pygame.image.load('Images/axolotl_sprites.png').convert_alpha()
             axolotl_sprites = ss.SpriteSheet(axolotl_sheet_image)
+            blood_image = pygame.image.load('Images/blood_sprite.png').convert_alpha()
+            blood_sprites = ss.SpriteSheet(blood_image)
 
-            # birds and axolotl parameters
+            # sprites parameters
             bird_width, bird_height = 160, 160
             bird_scale = 0.5
             axolotl_width, axolotl_height = 1373, 1373
             axolotl_scale = 0.1
+            blood_width, blood_height = blood_image.get_height(), blood_image.get_height()
+            blood_scale = 0.8
 
             bird_x, bird_y = 1280, random.randint(0, 300)
             last_bird = pygame.time.get_ticks()
+            prev_x = 0
+            prev_y = 0
 
             axolotl_x, axolotl_y = 500, 600
 
-            # creating birds and axolotl list
-            bird_list = []
+            def create_list(amount, sprite, w, h, scale, color=black_color):
+                animation_list = []
+                for num in range(amount):
+                    animation_list.append(sprite.get_image(num, w, h, scale, color))
+                return animation_list
+
+            # creating sprites list
             animations = 8
             last_update = pygame.time.get_ticks()
             animation_cd = 100
-            frame = 0
+            bird_frame = 0
+            bird_list = create_list(animations, bird_sprites, bird_width, bird_height, bird_scale)
 
-            axolotl_list = []
             axo_animations = 10
             axolotl_frame = 0
+            axolotl_list = create_list(axo_animations, axolotl_sprites, axolotl_width, axolotl_height, axolotl_scale)
 
-            for frame in range(animations):
-                bird_list.append(bird_sprites.get_image(frame, bird_width, bird_height, bird_scale, black_color))
+            blood_animations = 10
+            blood_frame = 0
+            blood_list = create_list(blood_animations, blood_sprites, blood_width, blood_height, blood_scale)
+            bird_killed = False
+            last_blood_update = pygame.time.get_ticks()
 
-            for axolotl_frame in range(axo_animations):
-                axolotl_list.append((axolotl_sprites.get_image(axolotl_frame, axolotl_width, axolotl_height, axolotl_scale,
-                                                               black_color)))
-
-
+            turned_on = False
             while running:
                 screen.fill(black_color)
                 for event in pygame.event.get():
@@ -175,13 +188,16 @@ class Menu:
                 if game_started:
                     if circles == 0:
                         increasing, alpha, circles = draw_fade_text("\"The Procrastinators\" presents", pixel_50,
-                                                                    white_color, 640, 360, 100, increasing, alpha,
+                                                                    white_color, 640, 360, 3, increasing, alpha,
                                                                     circles)
                     elif circles == 1:
-                        increasing, alpha, circles = draw_fade_text("Dorock", pixel_50, (179, 0, 0), 640, 360, 100,
+                        increasing, alpha, circles = draw_fade_text("Dorock", pixel_50, (179, 0, 0), 640, 360, 3,
                                                                     increasing, alpha, circles)
                     else:
                         screen.blit(bg_img, (0, 0))
+                        if not turned_on:
+                            pygame.mixer.music.unpause()
+                            turned_on = True
                         current_time = pygame.time.get_ticks()
 
                         start_action, start_hovered = button_actions(start_button, start_button_bright, current_time,
@@ -206,10 +222,10 @@ class Menu:
 
                         # update animation
                         if current_time - last_update >= animation_cd:
-                            if frame == animations - 1:
-                                frame = 0
+                            if bird_frame == animations - 1:
+                                bird_frame = 0
                             else:
-                                frame += 1
+                                bird_frame += 1
 
                             if axolotl_frame == axo_animations - 1:
                                 axolotl_frame = 0
@@ -217,15 +233,32 @@ class Menu:
                                 axolotl_frame += 1
                             last_update = current_time
 
+                        bird_click = button.Button(bird_x, bird_y, bird_click_img, 1)
                         if bird_x > 0:
                             bird_x -= random.randint(3, 10)
-                            screen.blit(bird_list[frame], (bird_x, bird_y))
+                            screen.blit(bird_list[bird_frame], (bird_x, bird_y))
+                            if bird_click.draw(screen):
+                                prev_x = bird_x
+                                prev_y = bird_y
+                                bird_x = -1
+                                bird_killed = True
+                                killed.play()
                         else:
                             if current_time - last_bird > random.randint(4000, 30000):
                                 bird_x = 1280
                                 bird_y = random.randint(0, 300)
-                                screen.blit(bird_list[frame], (bird_x, bird_y))
+                                screen.blit(bird_list[bird_frame], (bird_x, bird_y))
                                 last_bird = current_time
+
+                        if current_time - last_blood_update >= animation_cd:
+                            if bird_killed:
+                                if blood_frame == blood_animations - 1:
+                                    blood_frame = 0
+                                    bird_killed = False
+                                    last_blood_update = current_time
+                                else:
+                                    screen.blit(blood_list[blood_frame], (prev_x, prev_y))
+                                    blood_frame += 1
 
                         screen.blit(axolotl_list[axolotl_frame], (axolotl_x, axolotl_y))
                 else:
@@ -357,8 +390,10 @@ class Menu:
                 if sounds_action:
                     if svol == 0:
                         sound_hover.set_volume(0.15)
+                        killed.set_volume(0.2)
                     else:
                         sound_hover.set_volume(0)
+                        killed.set_volume(0)
 
                 if svol == 0:
                     draw_text('OFF', pixel_50, settings_color, 856, 356)
@@ -423,7 +458,7 @@ class Menu:
                 pygame.display.update()
                 clock.tick(fps)
 
-        main_menu(self, False)
+        main_menu(False)
 
         pygame.quit()
         sys.exit()
