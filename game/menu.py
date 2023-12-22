@@ -122,27 +122,41 @@ class Menu:
             exit_button = button.Button(465, 410, exit_img, 0.15)
             exit_button_bright = button.Button(465, 410, exit_img_bright, 0.15)
 
-            # birds
+            # birds and axolotl
             bird_sheet_image = pygame.image.load('Images/bird_sprites.png').convert_alpha()
             bird_sprites = ss.SpriteSheet(bird_sheet_image)
+            axolotl_sheet_image = pygame.image.load('Images/axolotl_sprites.png').convert_alpha()
+            axolotl_sprites = ss.SpriteSheet(axolotl_sheet_image)
 
-            # birds parameters
+            # birds and axolotl parameters
             bird_width, bird_height = 160, 160
             bird_scale = 0.5
+            axolotl_width, axolotl_height = 1373, 1373
+            axolotl_scale = 0.1
 
-            bird_x = 1280
-            bird_y = random.randint(0, 300)
+            bird_x, bird_y = 1280, random.randint(0, 300)
             last_bird = pygame.time.get_ticks()
 
-            # creating birds list
+            axolotl_x, axolotl_y = 500, 600
+
+            # creating birds and axolotl list
             bird_list = []
             animations = 8
             last_update = pygame.time.get_ticks()
             animation_cd = 100
             frame = 0
 
+            axolotl_list = []
+            axo_animations = 10
+            axolotl_frame = 0
+
             for frame in range(animations):
                 bird_list.append(bird_sprites.get_image(frame, bird_width, bird_height, bird_scale, black_color))
+
+            for axolotl_frame in range(axo_animations):
+                axolotl_list.append((axolotl_sprites.get_image(axolotl_frame, axolotl_width, axolotl_height, axolotl_scale,
+                                                               black_color)))
+
 
             while running:
                 screen.fill(black_color)
@@ -196,6 +210,11 @@ class Menu:
                                 frame = 0
                             else:
                                 frame += 1
+
+                            if axolotl_frame == axo_animations - 1:
+                                axolotl_frame = 0
+                            else:
+                                axolotl_frame += 1
                             last_update = current_time
 
                         if bird_x > 0:
@@ -206,9 +225,9 @@ class Menu:
                                 bird_x = 1280
                                 bird_y = random.randint(0, 300)
                                 screen.blit(bird_list[frame], (bird_x, bird_y))
-                                animation_cd = random.randint(50, 150)
                                 last_bird = current_time
 
+                        screen.blit(axolotl_list[axolotl_frame], (axolotl_x, axolotl_y))
                 else:
                     increasing, alpha, circles = draw_fade_text("Press SPACE to start the game", pixel_50, white_color,
                                                                 640, 360, 10, increasing, alpha, circles)
@@ -365,7 +384,6 @@ class Menu:
             resolution_on = button.Button(227, 245, resolution_on_img)
             resolution_off = button.Button(227, 245, resolution_off_img)
 
-
             back_hovered = False
             res_hovered = False
 
@@ -395,18 +413,10 @@ class Menu:
                     settings_menu(current_time)
                     running = False
 
-                current_res = str(screen.get_width())+'x'+str(screen.get_height())
-                if current_res not in resolutions:
-                    current_res = 'FULL HD'
-                res_text = current_res
-
-                match res_text:
-                    case '1280x720':
-                        draw_text(res_text, pixel_50, settings_color, 783, 252)
-                    case '760x576':
-                        draw_text(res_text, pixel_50, settings_color, 783, 252)
-                    case 'FULL HD':
-                        draw_text(res_text, pixel_50, settings_color, 783, 252)
+                draw_text('1280x720', pixel_50, settings_color, 783, 250)
+                draw_text('Тут должно было быть что-то', pixel_50, settings_color, 260, 350)
+                draw_text('функионирующее, но сложное.', pixel_50, settings_color, 260, 401)
+                draw_text('Когда-нибудь будет', pixel_50, settings_color, 260, 470)
 
                 screen.blit(resolution_slider, (729, 257))
 
