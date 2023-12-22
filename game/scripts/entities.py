@@ -235,7 +235,7 @@ class Player(PhysicsEntity):
 class Boss(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'boss', pos, size)
-        self.max_health = 36
+        self.max_health = 12
         self.health = self.max_health
         self.vulnerable = True
         self.left_pos = [243.5, 20]
