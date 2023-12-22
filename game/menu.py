@@ -9,7 +9,6 @@ from scripts import slider
 from scripts import sprite_sheet as ss
 
 
-
 class Menu:
     def __init__(self):
         pygame.init()
@@ -22,36 +21,6 @@ class Menu:
         pygame.display.set_caption('Dorock')
 
         resolutions = ['720x576', '1280x720', 'FULL HD']
-
-        def set_resolution(str_res, side):
-            global screen_width, screen_height, screen
-            if str_res == '720x576':
-                if side == 'left':
-                    screen_width, screen_height = 1920, 1080
-                    screen = pygame.display.set_mode((screen_width, screen_height))
-                    return 'FULL HD'
-                else:
-                    screen_width, screen_height = 1280, 720
-                    screen = pygame.display.set_mode((screen_width, screen_height))
-                    return '1280x720'
-            elif str_res == '1280x720':
-                if side == 'left':
-                    screen_width, screen_height = 720, 576
-                    screen = pygame.display.set_mode((screen_width, screen_height))
-                    return '720x576'
-                else:
-                    screen_width, screen_height = 1920, 1080
-                    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
-                    return 'FULL HD'
-            else:
-                if side == 'left':
-                    screen_width, screen_height = 1280, 720
-                    screen = pygame.display.set_mode((screen_width, screen_height))
-                    return '1280x720'
-                else:
-                    screen_width, screen_height = 720, 576
-                    screen = pygame.display.set_mode((screen_width, screen_height))
-                    return '720x576'
 
         # FPS
         clock = pygame.time.Clock()
@@ -392,15 +361,10 @@ class Menu:
             resolution_slider = pygame.image.load('Images/VideoMenu/slider_resolution.png').convert_alpha()
             resolution_slider = pygame.transform.scale(resolution_slider, (resolution_slider.get_width() * 0.4654,
                                                                            resolution_slider.get_height() * 0.4657))
-            res_button = pygame.image.load('Images/VideoMenu/res_but.png').convert_alpha()
-            resolution_button_img = pygame.transform.scale(res_button, (res_button.get_width() * 0.4654,
-                                                                        res_button.get_height() * 0.4657))
-
             # buttons
             resolution_on = button.Button(227, 245, resolution_on_img)
             resolution_off = button.Button(227, 245, resolution_off_img)
-            res_left = button.Button(729, 257, resolution_button_img)
-            res_right = button.Button(1000, 257, resolution_button_img)
+
 
             back_hovered = False
             res_hovered = False
@@ -435,11 +399,6 @@ class Menu:
                 if current_res not in resolutions:
                     current_res = 'FULL HD'
                 res_text = current_res
-
-                if res_left.draw(screen):
-                    res_text = set_resolution(current_res, 'left')
-                if res_right.draw(screen):
-                    res_text = set_resolution(current_res, 'right')
 
                 match res_text:
                     case '1280x720':
