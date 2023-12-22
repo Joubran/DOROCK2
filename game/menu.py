@@ -9,6 +9,7 @@ from scripts import slider
 from scripts import sprite_sheet as ss
 
 
+
 class Menu:
     def __init__(self):
         pygame.init()
@@ -20,6 +21,38 @@ class Menu:
         screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption('Dorock')
 
+        resolutions = ['720x576', '1280x720', 'FULL HD']
+
+        def set_resolution(str_res, side):
+            global screen_width, screen_height, screen
+            if str_res == '720x576':
+                if side == 'left':
+                    screen_width, screen_height = 1920, 1080
+                    screen = pygame.display.set_mode((screen_width, screen_height))
+                    return 'FULL HD'
+                else:
+                    screen_width, screen_height = 1280, 720
+                    screen = pygame.display.set_mode((screen_width, screen_height))
+                    return '1280x720'
+            elif str_res == '1280x720':
+                if side == 'left':
+                    screen_width, screen_height = 720, 576
+                    screen = pygame.display.set_mode((screen_width, screen_height))
+                    return '720x576'
+                else:
+                    screen_width, screen_height = 1920, 1080
+                    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+                    return 'FULL HD'
+            else:
+                if side == 'left':
+                    screen_width, screen_height = 1280, 720
+                    screen = pygame.display.set_mode((screen_width, screen_height))
+                    return '1280x720'
+                else:
+                    screen_width, screen_height = 720, 576
+                    screen = pygame.display.set_mode((screen_width, screen_height))
+                    return '720x576'
+
         # FPS
         clock = pygame.time.Clock()
         fps = 60
@@ -30,6 +63,7 @@ class Menu:
         # define color
         white_color = (255, 255, 255)
         black_color = (0, 0, 0)
+        settings_color = (44, 27, 9)
 
         # music
         pygame.mixer.init()
@@ -296,7 +330,7 @@ class Menu:
             back_hovered = False
 
             # SLIDER
-            test_slider = slider.Slider(772, 283, 253, 2, screen, vol)
+            test_slider = slider.Slider(772, 282, 253, 2, screen, vol)
 
             running = True
             while running:
@@ -326,6 +360,7 @@ class Menu:
 
                 music_action, music_hovered = button_actions(music_off, music_on, current_time, started_time,
                                                              music_hovered)
+                screen.blit(bg_slider, (729, 257))
                 test_slider.draw(screen)
 
                 svol = sound_hover.get_volume()
@@ -338,21 +373,37 @@ class Menu:
                         sound_hover.set_volume(0)
 
                 if svol == 0:
-                    draw_text('OFF', pixel_50, (44, 27, 9), 856, 356)
+                    draw_text('OFF', pixel_50, settings_color, 856, 356)
                 else:
-                    draw_text('ON', pixel_50, (44, 27, 9), 868, 356)
+                    draw_text('ON', pixel_50, settings_color, 868, 356)
 
-                screen.blit(bg_slider, (729, 257))
                 screen.blit(sounds_slider, (727, 362))
 
                 pygame.display.update()
                 clock.tick(fps)
 
         def video_menu(started_time):
+
+            # images
             video_bg_img = pygame.image.load('Images/VideoMenu/video_bg.png').convert_alpha()
             video_bg = pygame.transform.scale(video_bg_img, (screen_width, screen_height))
+            resolution_on_img = pygame.image.load('Images/VideoMenu/resolution_on.png').convert_alpha()
+            resolution_off_img = pygame.image.load('Images/VideoMenu/resolution_off.png').convert_alpha()
+            resolution_slider = pygame.image.load('Images/VideoMenu/slider_resolution.png').convert_alpha()
+            resolution_slider = pygame.transform.scale(resolution_slider, (resolution_slider.get_width() * 0.4654,
+                                                                           resolution_slider.get_height() * 0.4657))
+            res_button = pygame.image.load('Images/VideoMenu/res_but.png').convert_alpha()
+            resolution_button_img = pygame.transform.scale(res_button, (res_button.get_width() * 0.4654,
+                                                                        res_button.get_height() * 0.4657))
+
+            # buttons
+            resolution_on = button.Button(227, 245, resolution_on_img)
+            resolution_off = button.Button(227, 245, resolution_off_img)
+            res_left = button.Button(729, 257, resolution_button_img)
+            res_right = button.Button(1000, 257, resolution_button_img)
 
             back_hovered = False
+            res_hovered = False
 
             running = True
             while running:
@@ -373,6 +424,32 @@ class Menu:
                 if back_action:
                     settings_menu(current_time)
                     running = False
+
+                res_action, res_hovered = button_actions(resolution_off, resolution_on, current_time, started_time,
+                                                         res_hovered)
+                if back_action:
+                    settings_menu(current_time)
+                    running = False
+
+                current_res = str(screen.get_width())+'x'+str(screen.get_height())
+                if current_res not in resolutions:
+                    current_res = 'FULL HD'
+                res_text = current_res
+
+                if res_left.draw(screen):
+                    res_text = set_resolution(current_res, 'left')
+                if res_right.draw(screen):
+                    res_text = set_resolution(current_res, 'right')
+
+                match res_text:
+                    case '1280x720':
+                        draw_text(res_text, pixel_50, settings_color, 783, 252)
+                    case '760x576':
+                        draw_text(res_text, pixel_50, settings_color, 783, 252)
+                    case 'FULL HD':
+                        draw_text(res_text, pixel_50, settings_color, 783, 252)
+
+                screen.blit(resolution_slider, (729, 257))
 
                 pygame.display.update()
                 clock.tick(fps)

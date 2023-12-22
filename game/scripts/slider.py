@@ -8,11 +8,13 @@ class Slider:
         self.volume = vol
         self.sliderRect = pg.Rect(x, y, w, h)
         self.clicked = False
-        self.circle = pg.draw.circle(screen, self.color, (self.circle_x, (self.sliderRect.h / 2 + self.sliderRect.y)), self.sliderRect.h * 3)
+        self.circle = pg.draw.circle(screen, self.color, (self.circle_x, (self.sliderRect.h / 2 + self.sliderRect.y)),
+                                     self.sliderRect.h * 3)
 
     def draw(self, screen, vol=1):
         pg.draw.rect(screen, self.color, self.sliderRect)
-        pg.draw.circle(screen, self.color, (self.circle_x, (self.sliderRect.h / 2 + self.sliderRect.y)), self.sliderRect.h * 3)
+        pg.draw.circle(screen, self.color, (self.circle_x, (self.sliderRect.h / 2 + self.sliderRect.y)),
+                       self.sliderRect.h * 3)
 
     def get_volume(self):
         return self.volume
@@ -29,7 +31,8 @@ class Slider:
             self.volume = int((x - self.sliderRect.x) / float(self.sliderRect.w) * 100)
 
     def on_slider(self, x, y):
-        if self.on_slider_hold(x, y) or self.sliderRect.x <= x <= self.sliderRect.x + self.sliderRect.w and self.sliderRect.y <= y <= self.sliderRect.y + self.sliderRect.h:
+        if (self.on_slider_hold(x, y) or self.sliderRect.x <= x <= self.sliderRect.x + self.sliderRect.w and
+                self.sliderRect.y <= y <= self.sliderRect.y + self.sliderRect.h):
             return True
         else:
             return False
